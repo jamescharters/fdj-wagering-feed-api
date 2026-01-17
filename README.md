@@ -36,13 +36,15 @@ The app will be available at `http://localhost:5000/customer/<customerId>/stats`
 
 ### Assumptions
 
-- Traditional API structure using distinct controllers, repositories, services etc for testability and composability
+- Implementation using traditional API structure with distinct controllers, repositories, services etc for testability and composability
 - No hard requirement of using a design pattern such as CQRS: the goal here was not to completely overengineer the initial solution; though the code here would be amenable to such a pattern should it be desired
 - "This will only work for the duration of your session" is assumed to mean the API HTTP GET endpoint `/customer/<customerId>/stats` only returns a response payload while the WebSocket session itself is active. In effect, this means the API only provides HTTP 200 range responses for valid customer IDs for about 3 minutes after start. Be quick!
+- Further to the point above, the service however is not automatically terminated upon receipt of EndOfFeed message
 - TotalStandToWin in the response has no currency conversion, and decimal values rounded to 2 places (i.e. the value corresponds to dollars-and-cents, Euro-and-cents etc)
 - Automatic connection to web socket to receive messages is appropriate on application start, and once EndOfFeed is received (or our own hard timelimit expires), there is no automatic reconnection or even mechanism to re-establish the websocket subscription
-- "Fixture" messages don't seem to be needed for the customer stats endpoint, so they're ignored
+- "Fixture" WebSocket messages don't seem to be needed for the customer stats endpoint, so they're ignored
 - Repository `Clear()` only gets called at startup before the WebSocket connects, so no locking needed there
+- A unified repository for Customer and associated data could be plausible, but these concerns are kept separate in this implementation
 
 ### Limitations
 
@@ -50,15 +52,19 @@ The app will be available at `http://localhost:5000/customer/<customerId>/stats`
 - Customer data, once obtained, is cached for application lifetime and therefore oblivious to changes at the source of truth (e.g. a name update for a customer)
 - Only works as a single instance (multiple instances would each have their own separate data, leading to potentially inconsistent responses basded on which server answers the client query)
 - API returns HTTP 503 once the feed completes (dis/gracefully), which might not be ideal depending on actual real world requirements
-- No auth, rate limiting, or HTTP request caching (see TODOs/DEVNOTE remarks in the code). These, among other things, would require consideration for real-world usage
+- No auth, rate limiting, or HTTP request/response caching (see TODOs/DEVNOTE remarks in the code). These, among other things, would require consideration for real-world usage
+- No end to end / functional tests, nor performance (which might be important in this context to ensure highly performant API behaviour). Deemed out of scope for this proof of concept
 
 ### Potential Extensions
 
 - Persistent storage such as Redis so data survives restarts and permit shared state for horizontal scaling (eg. Redis as backing store)
-- More intelligent caching of customer data, i.e. awareness of expiration or sliding window
-- Internal health check endpoints for more robust container orchestration
+- More intelligent caching of customer data, i.e. awareness of expiration/changes to source of truth or sliding window expiration of local copy for example
+- The handling of wagering data (WageringDataRepository) is based on a concurrent dictionary of the customer ID and the incrementally updated StandToWin value. The value of the dictionary would certainly be a more complex data structure (likely requiring slim locking logic) if anything above this trivial StandToWin data was required by the API. The repository is intentionally basic to meet the basic needs of the application as written to spec
+- Internal health check endpoints for more robust container orchestration (and updates to Docker files to use these)
 - Metrics/tracing (Azure AppInsights, Prometheus etc)
 - Rate limiting middleware
 - Auth (JWT, client API keys, or some other form)
 - Secrets management for sensitive config
+- Caching of requests/responses at the API edge
+- Depending on customers and data, split based on tenant/region rather than a "kitchen sink" API for all customers (speculative!)
 - ... others I am sure!

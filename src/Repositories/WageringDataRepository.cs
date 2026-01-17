@@ -22,6 +22,9 @@ public class WageringDataRepository(ILogger<WageringDataRepository> logger) : IW
     // of if there are multiple instances of this API running (i.e. congruence of data used by APIs to respond to 
     // requests) and so on.
     private readonly ConcurrentDictionary<long, decimal> _wageringData = new();
+
+    // DEVNOTE: using volatile to ensure visibility of changes across threads, as this is a simple boolean flag
+    // and does not require complex synchronisation (eg locks)
     private volatile bool _isFeedComplete;
 
     public bool IsFeedComplete => _isFeedComplete;

@@ -68,8 +68,6 @@ public class WebSocketWorker : BackgroundService
             {
                 await ConnectAndProcessAsync(wsUrl, ct);
             }, sessionCts.Token);
-
-            _wageringDataRepository.MarkFeedComplete();
         }
         catch (OperationCanceledException)
         {
@@ -85,6 +83,11 @@ public class WebSocketWorker : BackgroundService
             // DEVNOTE: unrecoverable error if we cannot establish the WebSocket connection - stop the application
             _applicationLifetime.StopApplication();
         }
+        finally
+        {
+            _logger.LogInformation("WebSocketWorker stopping.");
+            _wageringDataRepository.MarkFeedComplete();
+        }
     }
 
     private async Task ConnectAndProcessAsync(string wsUrl, CancellationToken cancellationToken)
@@ -95,6 +98,8 @@ public class WebSocketWorker : BackgroundService
 
         _logger.LogInformation("WebSocket Connected.");
 
+        // DEVNOTE: a 4096 byte buffer should be sufficient for the messages we expect to receive
+        // Another idea is to use a pooled buffer from ArrayPool<byte>.Shared.Rent/Return for better performance (avoid allocations)
         var buffer = new byte[4096];
         using var messageBuffer = new MemoryStream();
 

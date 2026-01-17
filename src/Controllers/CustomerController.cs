@@ -20,6 +20,7 @@ public class CustomerController(
         var customerInfo = await customerService.GetCustomerAsync(customerId, cancellationToken);
         if (customerInfo == null) return NotFound();
         
+        // DEVNOTE: interpreted as "if the feed is still in progress, we can serve requests"
         if (wageringDataRepository.IsFeedComplete) return StatusCode(StatusCodes.Status503ServiceUnavailable);
         
         var totalStandToWin = wageringDataRepository.GetTotalStandToWin(customerId) ?? 0m;
