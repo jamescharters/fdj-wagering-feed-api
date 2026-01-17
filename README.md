@@ -1,5 +1,9 @@
 # Wagering Stats API
 
+Thank you for reviewing my code for the "Wagering Feed Consumer" task, written to satisfy the requirements as specified in the provided PDF. I've named the subsequent application the "Wagering Stats API" as, though it consumes both the FDJ wagering feed and Customer API, it presents a combined view to its own consumers. I suppose it's just a matter of naming semantics and personal taste!
+
+Instructions to run the application as well as a high level development diary are found in this document. Please also refer to the source code for a variety of specific developer commentary/musings marked with `// DEVNOTE: ...`
+
 ## Prerequisites
 
 This application was developed and tested on macOS. Ensure that the following are installed:
