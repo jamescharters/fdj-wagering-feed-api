@@ -36,6 +36,18 @@ CANDIDATE_ID=your-id-here docker compose up
 
 The app will be available at `http://localhost:5000/customer/<customerId>/stats`.
 
+For example, to obtain the information for `Barbara Rodriguez` while the wagering data stream is being consumed by the API, execute
+
+```bash
+curl -X GET http://localhost:5000/customer/114587/stats
+```
+
+This should return a payload of the expected form
+
+```
+{"customerId":114587,"name":"Barbara Rodriguez","totalStandToWin":2095.45}
+```
+
 ## Design Notes
 
 ### Assumptions
