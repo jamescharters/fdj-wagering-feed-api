@@ -13,8 +13,8 @@ This application was developed and tested on macOS. Ensure that the following ar
 ## Code
 
 ```bash
-git clone https://github.com/jamescharters/fdj-wagering-feed-consumer.git
-cd fdj-wagering-feed-consumer
+git clone https://github.com/jamescharters/fdj-wagering-stats-api
+cd fdj-wagering-stats-api
 ```
 
 ## Run (Docker)
